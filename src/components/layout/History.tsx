@@ -1,4 +1,4 @@
-import React from 'react'
+// import React from 'react'
 import Banner from '../base/Banner'
 
 function History() {
