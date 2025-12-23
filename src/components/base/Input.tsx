@@ -16,7 +16,7 @@ export const Input:React.FC<inputProps> = ({label,name,value,type,placeholder,cl
     return(
         <>
         <div className="w-full h-fit">
-            <label htmlFor={name} className="text-lg text">
+            <label htmlFor={name} className="text">
                 {label}
             </label>
             <input type={type} name={name} value={value} onChange={onChange} placeholder={placeholder} className={cn(className,inputStyle)} />

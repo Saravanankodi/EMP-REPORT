@@ -5,22 +5,22 @@ import { Button } from '../base/Button'
 function ReportForm() {
   return (
     <>
-    <section className="w-full h-fit m-auto border py-2 px-4 sm:py-5 sm:px-10 rounded-2xl sm:flex items-baseline-last justify-evenly gap-5 ">
+    <section className="w-full h-fit m-auto border py-2 px-4 sm:py-5 sm:px-10 rounded-2xl flex flex-col sm:flex-row items-center sm:items-baseline-last justify-center sm:justify-evenly gap-5 ">
       <Input
       label='Start-Time'
       type='time'
-      className='max-w-[300px]'
+      className='max-w-[300px] text-base'
       />
       <Input
       label='End-Time'
       type='time'
-      className='max-w-[300px]'
+      className='max-w-[300px] text-base'
       />
       <Input
       label='Description'
       type='text'
       placeholder='Description'
-      className='max-w-[300px]'
+      className='max-w-[300px] text-base'
       />
       <Button variant={'primary'} className='rounded-xl w-1/2 text-nowrap text-2xl'>Add Report</Button>
     </section>

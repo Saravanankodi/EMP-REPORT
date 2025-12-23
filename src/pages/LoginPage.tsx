@@ -1,4 +1,4 @@
-import React from 'react'
+// import React from 'react'
 import bgImg from '../assets/bg.png'
 import logo from '../assets/logo.png'
 import LoginForm from '../components/forms/LoginForm'
