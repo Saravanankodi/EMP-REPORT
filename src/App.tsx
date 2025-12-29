@@ -21,7 +21,7 @@ function App() {
       setUser(currentUser);
   
       if (!currentUser) {
-        setRole(null);
+        setRole('');
         return;
       }
   

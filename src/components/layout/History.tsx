@@ -57,7 +57,7 @@ function History() {
     });
   
     return () => unsubscribe();
-  }, []);
+  }, [groupedReports]);
   
   return (
     <>
