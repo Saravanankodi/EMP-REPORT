@@ -22,8 +22,6 @@ function LoginForm() {
 
             if (role === "admin") navigate("/admin");
             else navigate("/user");
-            const token = await res.user.getIdTokenResult();
-            console.log("CUSTOM CLAIMS:", token.claims);
         }
         catch (err) {
             console.error(err);

@@ -22,7 +22,7 @@ function ReportForm() {
     // Add new report
     await addDoc(reportsRef, {
       userId: auth.currentUser.uid,
-      email: auth.currentUser.email,
+      // name: auth.currentUser.email,
       timeStart: startTime,
       timeEnd: endTime,
       report:disc,
