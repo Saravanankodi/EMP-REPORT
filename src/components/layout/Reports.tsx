@@ -7,9 +7,7 @@ import {
   onSnapshot,
   orderBy,
   Timestamp,
-  startAfter,
-  limit,
-  getDocs,
+  QueryConstraint
 } from "firebase/firestore";
 import { db } from "../../lib/firebase";
 import Banner from "../base/Banner";
@@ -26,6 +24,7 @@ interface User {
   id: string;
   name: string;
   role: string;
+  email?: string;
 }
 
 interface Report {
@@ -99,7 +98,7 @@ function Reports({ filters }: ReportsProps) {
     const reportsRef = collection(db, "reports");
     let q = query(reportsRef, orderBy("submittedAt", "desc"));
 
-    const constraints: any[] = [];
+    const constraints: QueryConstraint[] = [];
 
     // Filter by employee (using email or name search in usersMap later)
     if (filters.employeeId) {
