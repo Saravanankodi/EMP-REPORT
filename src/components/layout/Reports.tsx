@@ -11,6 +11,8 @@ import {
 } from "firebase/firestore";
 import { db } from "../../lib/firebase";
 import Banner from "../base/Banner";
+import { doc, updateDoc, deleteDoc } from "firebase/firestore";
+import Swal from "sweetalert2";
 
 interface FilterState {
   employeeId?: string;
@@ -165,6 +167,33 @@ function Reports({ filters }: ReportsProps) {
     return unsub;
   }, [filters, usersLoaded, usersMap]);
 
+  const handleMarkRead = async (reportId: string) => {
+    const ref = doc(db, "reports", reportId);
+  
+    await updateDoc(ref, {
+      status: "read",
+      updatedAt: Timestamp.now(),
+    });
+  
+    Swal.fire("Updated", "Report marked as read", "success");
+  };
+  const handleDelete = async (reportId: string) => {
+    const ref = doc(db, "reports", reportId);
+  
+    const result = await Swal.fire({
+      title: "Delete this report?",
+      text: "This action cannot be undone",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Yes, delete",
+    });
+  
+    if (!result.isConfirmed) return;
+  
+    await deleteDoc(ref);
+  
+    Swal.fire("Deleted", "Report removed from database", "success");
+  };
   // Rest of your render remains mostly same
   return (
     <section className="w-full h-auto overscroll-contain">
@@ -222,7 +251,29 @@ function Reports({ filters }: ReportsProps) {
                 </td>
 
                 <td className="text text-center border py-2">
-                  {/* Future actions like edit/delete */}
+                  {reports.map((report) => (
+                    <div key={report.id} className="flex flex-col gap-2">
+                      
+                      {report.status !== "read" ? (
+                        <button
+                          className="btn px-3 py-1 border rounded"
+                          onClick={() => handleMarkRead(report.id)}
+                        >
+                          Pending
+                        </button>
+                      ) : (
+                        <span className="text-green-700 font-semibold">Read</span>
+                      )}
+
+                      <button
+                        className="btn-delete px-3 py-1 border rounded text-red-700"
+                        onClick={() => handleDelete(report.id)}
+                      >
+                        Delete
+                      </button>
+
+                    </div>
+                  ))}
                 </td>
               </tr>
             ))
