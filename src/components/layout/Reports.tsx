@@ -35,6 +35,7 @@ interface Report {
   report: string;
   timeStart: string;
   timeEnd: string;
+  status?: "pending" | "read";
 }
 
 interface EnrichedReport extends Report {
