@@ -1,69 +1,46 @@
 import './App.css'
 import UserPage from './pages/User'
-import { useEffect, useState } from "react";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { onAuthStateChanged } from "firebase/auth";
-import type { User } from "firebase/auth";
-import { auth, db } from "./lib/firebase";
-import { doc, getDoc } from "firebase/firestore";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+// import { useAuth } from "./context/AuthContext";
 import LoginPage from './pages/LoginPage';
 import Admin from './pages/Admin';
-import ProtectedRoute from "./components/ProtectedRoute";
+// import ProtectedRoute from "./components/ProtectedRoute";
+// import type { ReactElement } from "react";
 
+
+
+const Unauthorized = () => (
+  <div className="flex items-center justify-center min-h-screen bg-gray-100">
+    <h1 className="text-4xl font-bold text-red-600">Access Denied</h1>
+  </div>
+);
 function App() {
-  const [user, setUser] = useState<User | null>(null);
-  const [role, setRole] = useState("");
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      console.log("Auth user:", currentUser);
-  
-      setUser(currentUser);
-  
-      if (!currentUser) {
-        setRole('');
-        return;
-      }
-  
-      try {
-        const ref = doc(db, "users", currentUser.uid);
-        const snap = await getDoc(ref);
-  
-        if (snap.exists()) {
-          setRole(snap.data().role);
-        }
-      } catch (err) {
-        console.error("Failed to fetch role:", err);
-      }
-    });
-  
-    return () => unsubscribe();
-  }, []);
   
   return (
     <>
     <section className="max-w-screen min-h-screen m-auto">
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<LoginPage />} />
+        <Route path="/login" element={<LoginPage />} />
 
-        <Route
-          path="/admin"
+        {/* Authenticated Layout (Employee + Admin) */}
+        {/* <Route
+          path="/*"
           element={
-            <ProtectedRoute user={user} role={role} allowedRole="admin">
-              <Admin />
+            <ProtectedRoute allowedRoles={["employee", "admin"]}>
+              <Layout />
             </ProtectedRoute>
           }
-        />
+        > */}
+          {/* Nested Routes inside Layout */}
+          <Route path="/" element={<UserPage />} />
 
-        <Route
-          path="/user"
-          element={
-            <ProtectedRoute user={user} role={role} allowedRole="employee">
-              <UserPage />
-            </ProtectedRoute>
-          }
-        />
+          {/* Admin Routes */}
+          <Route path="admin" element={<Admin />} />
+        {/* </Route> */}
+
+        <Route path="/unauthorized" element={<Unauthorized />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
     </section>    

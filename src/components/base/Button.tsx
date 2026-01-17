@@ -21,3 +21,4 @@ export const Button:React.FC<ButtonProps> =({
         <button className={cn(buttonVarient({variant,className}))} {...props}/>
     )
 }
+export default Button;

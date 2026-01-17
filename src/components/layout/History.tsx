@@ -18,9 +18,7 @@ type GroupedReports = Record<string, Report[]>;
 
 const groupReportsByDate = (reports: Report[]): GroupedReports => {
   return reports.reduce((acc, report) => {
-    const dateKey = report.submittedAt
-      .toDate()
-      .toLocaleDateString("en-GB");
+    const dateKey = report.submittedAt.toDate().toLocaleDateString("en-GB");
 
     if (!acc[dateKey]) {
       acc[dateKey] = [];
