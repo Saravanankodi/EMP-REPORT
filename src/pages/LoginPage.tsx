@@ -43,11 +43,10 @@ const LoginPage = () => {
             <section className="w-full h-full p-5">
                 <header className="w-full h-auto p-2">
                 <h2 className="heading text-3xl my-3 text-center">
-                    ATTENDANCE LOGIN
+                    LOGIN
                 </h2>
                 <p className="text text-[18px]">
-                    Login with your <span className="text-[#0496ff] font-semibold">employee</span> or{" "}
-                    <span className="text-[#0496ff] font-semibold">admin</span> credential.
+                    Enter Your Details & Login
                 </p>
                 </header>
 

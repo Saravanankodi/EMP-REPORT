@@ -198,88 +198,90 @@ function Reports({ filters }: ReportsProps) {
   return (
     <section className="w-full h-auto overscroll-contain">
       <h2 className="heading text-center text-4xl">Report History</h2>
-      <table className="w-full h-auto m-auto my-5">
-        <thead className="border">
-          <tr>
-            <th className="w-1/8 text-2xl heading border">Date</th>
-            <th className="w-1/8 text-2xl heading border">Employee</th>
-            <th className="w-1/8 text-2xl heading border">Total Entries</th>
-            <th className="w-4/8 text-2xl heading border">Entries</th>
-            <th className="w-1/8 text-2xl heading border">Actions</th>
-          </tr>
-        </thead>
-        <tbody className="border text-sm sm:text-base">
-          {Object.keys(groupedReports).length === 0 ? (
+      <div className="max-sm:max-w-75 max-sm:max-h-80 max-sm:overflow-scroll m-auto">
+        <table className="w-full h-auto m-auto my-5">
+          <thead className="border">
             <tr>
-              <td colSpan={5} className="text text-center py-4">
-                No reports found
-              </td>
+              <th className="w-1/8 text-2xl heading border">Date</th>
+              <th className="w-1/8 text-2xl heading border">Employee</th>
+              <th className="w-1/8 text-2xl heading border">Total Entries</th>
+              <th className="w-4/8 text-2xl heading border">Entries</th>
+              <th className="w-1/8 text-2xl heading border">Actions</th>
             </tr>
-          ) : (
-            Object.entries(groupedReports).map(([date, reports]) => (
-              <tr key={date}>
-                <td className="text text-center border py-2">{date}</td>
-
-                <td className="border py-2 px-2">
-                  {Array.from(
-                    new Set(
-                      reports
-                        .map((report) => {
-                          const user = usersMap[report.userId];
-                          return user?.name || user?.email || "(Unknown)";
-                        })
-                        .filter(Boolean)
-                    )
-                  ).map((name) => (
-                    <div key={name} className="py-1">
-                      {name}
-                    </div>
-                  ))}
-                </td>
-
-                <td className="border text-center py-2">{reports.length}</td>
-
-                <td className="border py-2">
-                  {reports.map((report) => (
-                    <div key={report.id} className="w-4/5 m-auto p-2">
-                      <Banner
-                        date={`${report.timeStart} - ${report.timeEnd}`}
-                        report={report.report}
-                      />
-                    </div>
-                  ))}
-                </td>
-
-                <td className="text text-center border py-2">
-                  {reports.map((report) => (
-                    <div key={report.id} className="flex flex-col gap-2">
-                      
-                      {report.status !== "read" ? (
-                        <button
-                          className="btn px-3 py-1 border rounded"
-                          onClick={() => handleMarkRead(report.id)}
-                        >
-                          Pending
-                        </button>
-                      ) : (
-                        <span className="text-green-700 font-semibold">Read</span>
-                      )}
-
-                      <button
-                        className="btn-delete px-3 py-1 border rounded text-red-700"
-                        onClick={() => handleDelete(report.id)}
-                      >
-                        Delete
-                      </button>
-
-                    </div>
-                  ))}
+          </thead>
+          <tbody className="border text-sm sm:text-base">
+            {Object.keys(groupedReports).length === 0 ? (
+              <tr>
+                <td colSpan={5} className="text text-center py-4">
+                  No reports found
                 </td>
               </tr>
-            ))
-          )}
-        </tbody>
-      </table>
+            ) : (
+              Object.entries(groupedReports).map(([date, reports]) => (
+                <tr key={date}>
+                  <td className="text text-center border py-2">{date}</td>
+
+                  <td className="border py-2 px-2">
+                    {Array.from(
+                      new Set(
+                        reports
+                          .map((report) => {
+                            const user = usersMap[report.userId];
+                            return user?.name || user?.email || "(Unknown)";
+                          })
+                          .filter(Boolean)
+                      )
+                    ).map((name) => (
+                      <div key={name} className="py-1">
+                        {name}
+                      </div>
+                    ))}
+                  </td>
+
+                  <td className="border text-center py-2">{reports.length}</td>
+
+                  <td className="border py-2">
+                    {reports.map((report) => (
+                      <div key={report.id} className="w-4/5 m-auto p-2">
+                        <Banner
+                          date={`${report.timeStart} - ${report.timeEnd}`}
+                          report={report.report}
+                        />
+                      </div>
+                    ))}
+                  </td>
+
+                  <td className="text text-center border py-2">
+                    {reports.map((report) => (
+                      <div key={report.id} className="flex flex-col gap-2">
+                        
+                        {report.status !== "read" ? (
+                          <button
+                            className="btn px-3 py-1 border rounded"
+                            onClick={() => handleMarkRead(report.id)}
+                          >
+                            Pending
+                          </button>
+                        ) : (
+                          <span className="text-green-700 font-semibold">Read</span>
+                        )}
+
+                        <button
+                          className="btn-delete px-3 py-1 border rounded text-red-700"
+                          onClick={() => handleDelete(report.id)}
+                        >
+                          Delete
+                        </button>
+
+                      </div>
+                    ))}
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
     </section>
   );
 }
