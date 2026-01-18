@@ -205,7 +205,7 @@ function Reports({ filters }: ReportsProps) {
               <th className="w-1/8 text-2xl heading border">Date</th>
               <th className="w-1/8 text-2xl heading border">Employee</th>
               <th className="w-1/8 text-2xl heading border">Total Entries</th>
-              <th className="w-4/8 text-2xl heading border">Entries</th>
+              <th className="w-4/8 text-2xl heading border max-sm:min-w-max">Entries</th>
               <th className="w-1/8 text-2xl heading border">Actions</th>
             </tr>
           </thead>
@@ -240,9 +240,9 @@ function Reports({ filters }: ReportsProps) {
 
                   <td className="border text-center py-2">{reports.length}</td>
 
-                  <td className="border py-2">
+                  <td className="border max-sm:min-w-max py-2">
                     {reports.map((report) => (
-                      <div key={report.id} className="w-4/5 m-auto p-2">
+                      <div key={report.id} className="w-4/5 max-sm:w-full m-auto p-2">
                         <Banner
                           date={`${report.timeStart} - ${report.timeEnd}`}
                           report={report.report}

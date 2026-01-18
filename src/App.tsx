@@ -1,13 +1,29 @@
 import './App.css'
 import UserPage from './pages/User'
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-// import { useAuth } from "./context/AuthContext";
+import { useAuth } from "./context/AuthContext";
 import LoginPage from './pages/LoginPage';
 import Admin from './pages/Admin';
 // import ProtectedRoute from "./components/ProtectedRoute";
-// import type { ReactElement } from "react";
+import type { ReactElement } from "react";
 
+const ProtectedRoute = ({ children, allowedRole }: { children: ReactElement; allowedRole: string }) => {
+  const { currentUser, loading } = useAuth();
 
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-100">
+        <div className="text-xl font-semibold text-gray-700">Loading...</div>
+      </div>
+    );
+  }
+
+  if (!currentUser) return <Navigate to="/login" replace />;
+  // if (currentUser.role == 'admin') return <Navigate to="/admin" replace />;
+  if (!allowedRole.includes(currentUser.role)) return <Navigate to="/unauthorized" replace />;
+
+  return children;
+};
 
 const Unauthorized = () => (
   <div className="flex items-center justify-center min-h-screen bg-gray-100">
@@ -33,10 +49,18 @@ function App() {
           }
         > */}
           {/* Nested Routes inside Layout */}
-          <Route path="/" element={<UserPage />} />
+          <Route path="/" element={
+            <ProtectedRoute allowedRole='employee'>
+                <UserPage />
+            </ProtectedRoute>
+          } />
 
           {/* Admin Routes */}
-          <Route path="admin" element={<Admin />} />
+          <Route path="/admin" element={
+            <ProtectedRoute allowedRole='admin'>
+                <Admin />
+            </ProtectedRoute>
+          } />
         {/* </Route> */}
 
         <Route path="/unauthorized" element={<Unauthorized />} />

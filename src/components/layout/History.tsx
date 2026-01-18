@@ -11,7 +11,7 @@ interface Report {
   report : string;
   timeStart:string;
   timeEnd:string;
-  
+  status?: "pending" | "read";
 }
 
 type GroupedReports = Record<string, Report[]>;
@@ -99,8 +99,15 @@ function History() {
                     </td>
 
                     {/* Actions */}
-                    <td className="text text-center border">
-                      {/* future buttons like View / Delete */}
+                    <td className="text text-center h-full border m-auto p-2 ">
+                      {reports.map(report=>(
+                        report.status == "read" ?
+                        <p className="text text-white h-12.5 w-24 bg-[#008A2E] grid place-content-center m-auto p-2 my-2 rounded-xl">
+                          Read
+                        </p>: <p className="text text-white h-12.5 w-24 bg-[#ffcc00] grid place-content-center m-auto p-2 my-2 rounded-xl">
+                          Pendding
+                        </p>
+                      ))}
                     </td>
                   </tr>
                 ))}
