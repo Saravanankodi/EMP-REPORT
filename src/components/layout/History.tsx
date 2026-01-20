@@ -11,17 +11,15 @@ interface Report {
   report : string;
   timeStart:string;
   timeEnd:string;
-  
+  status?: "pending" | "read";
 }
 
 type GroupedReports = Record<string, Report[]>;
 
 const groupReportsByDate = (reports: Report[]): GroupedReports => {
   return reports.reduce((acc, report) => {
-    const dateKey = report.submittedAt
-      .toDate()
-      .toLocaleDateString("en-GB");
-
+    const dateKey = report.submittedAt.toDate().toLocaleDateString("en-GB");
+ 
     if (!acc[dateKey]) {
       acc[dateKey] = [];
     }
@@ -65,49 +63,58 @@ function History() {
         <h2 className="heading text-center text-2xl sm:text-4xl">
             Report History
         </h2>
-        <table className="w-fit sm:w-full h-auto m-auto my-5  overscroll-contain">
-            <thead className="border">
-                <tr>
-                    <th className="w-1/5 text-base sm:text-2xl heading border">Date</th>
-                    <th className="w-3/5 text-base sm:text-2xl heading border">Entries</th>
-                    <th className="w-1/5 text-base sm:text-2xl heading border">Actions</th>
-                </tr>
-            </thead>
-            <tbody className="border text-sm sm:text-base">
-              {Object.entries(groupedReports).length === 0 && (
-                <tr>
-                  <td colSpan={3} className="text text-center">
-                    No reports found
-                  </td>
-                </tr>
-              )}
+        <div className="max-sm:max-w-75 max-sm:max-h-80 max-sm:overflow-scroll m-auto">
+          <table className="w-full h-auto m-auto my-5 ">
+              <thead className="border">
+                  <tr>
+                      <th className="w-1/5 text-base sm:text-2xl heading border">Date</th>
+                      <th className="w-3/5 text-base sm:text-2xl heading border">Entries</th>
+                      <th className="w-1/5 text-base sm:text-2xl heading border">Actions</th>
+                  </tr>
+              </thead>
+              <tbody className="border text-sm sm:text-base">
+                {Object.entries(groupedReports).length === 0 && (
+                  <tr>
+                    <td colSpan={3} className="text text-center">
+                      No reports found
+                    </td>
+                  </tr>
+                )}
 
-              {Object.entries(groupedReports).map(([date, reports]) => (
-                <tr key={date}>
-                  {/* Date */}
-                  <td className="text text-center border">{date}</td>
+                {Object.entries(groupedReports).map(([date, reports]) => (
+                  <tr key={date}>
+                    {/* Date */}
+                    <td className="text text-center border">{date}</td>
 
-                  {/* Entries */}
-                  <td className="border">
-                    {reports.map((report) => (
-                      <div key={report.id} className="w-4/5 m-auto p-2">
-                        <Banner
-                          date={`${report.timeStart} - ${report.timeEnd}`}
-                          report={report.report}
-                        />
-                      </div>
-                    ))}
-                  </td>
+                    {/* Entries */}
+                    <td className="border">
+                      {reports.map((report) => (
+                        <div key={report.id} className="w-4/5 m-auto p-2">
+                          <Banner
+                            date={`${report.timeStart} - ${report.timeEnd}`}
+                            report={report.report}
+                          />
+                        </div>
+                      ))}
+                    </td>
 
-                  {/* Actions */}
-                  <td className="text text-center border">
-                    {/* future buttons like View / Delete */}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
+                    {/* Actions */}
+                    <td className="text text-center h-full border m-auto p-2 ">
+                      {reports.map(report=>(
+                        report.status == "read" ?
+                        <p className="text text-white h-12.5 w-24 bg-[#008A2E] grid place-content-center m-auto p-2 my-2 rounded-xl">
+                          Read
+                        </p>: <p className="text text-white h-12.5 w-24 bg-[#ffcc00] grid place-content-center m-auto p-2 my-2 rounded-xl">
+                          Pendding
+                        </p>
+                      ))}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
 
-        </table>
+          </table>
+        </div>
     </section>
     </>
   )

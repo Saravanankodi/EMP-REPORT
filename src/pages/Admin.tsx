@@ -22,7 +22,7 @@ const Admin = () => {
 
   return (
     <section className="w-full h-auto px-5 sm:px-10 grid gap-5">
-      <Header Name="Saravana Kodi" />
+      <Header/>
       <FillterForm
         filters={filters}
         setFilters={setFilters}

@@ -11,6 +11,8 @@ import {
 } from "firebase/firestore";
 import { db } from "../../lib/firebase";
 import Banner from "../base/Banner";
+import { doc, updateDoc, deleteDoc } from "firebase/firestore";
+import Swal from "sweetalert2";
 
 interface FilterState {
   employeeId?: string;
@@ -35,6 +37,7 @@ interface Report {
   report: string;
   timeStart: string;
   timeEnd: string;
+  status?: "pending" | "read";
 }
 
 interface EnrichedReport extends Report {
@@ -164,70 +167,121 @@ function Reports({ filters }: ReportsProps) {
     return unsub;
   }, [filters, usersLoaded, usersMap]);
 
+  const handleMarkRead = async (reportId: string) => {
+    const ref = doc(db, "reports", reportId);
+  
+    await updateDoc(ref, {
+      status: "read",
+      updatedAt: Timestamp.now(),
+    });
+  
+    Swal.fire("Updated", "Report marked as read", "success");
+  };
+  const handleDelete = async (reportId: string) => {
+    const ref = doc(db, "reports", reportId);
+  
+    const result = await Swal.fire({
+      title: "Delete this report?",
+      text: "This action cannot be undone",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Yes, delete",
+    });
+  
+    if (!result.isConfirmed) return;
+  
+    await deleteDoc(ref);
+  
+    Swal.fire("Deleted", "Report removed from database", "success");
+  };
   // Rest of your render remains mostly same
   return (
     <section className="w-full h-auto overscroll-contain">
       <h2 className="heading text-center text-4xl">Report History</h2>
-      <table className="w-full h-auto m-auto my-5">
-        <thead className="border">
-          <tr>
-            <th className="w-1/8 text-2xl heading border">Date</th>
-            <th className="w-1/8 text-2xl heading border">Employee</th>
-            <th className="w-1/8 text-2xl heading border">Total Entries</th>
-            <th className="w-4/8 text-2xl heading border">Entries</th>
-            <th className="w-1/8 text-2xl heading border">Actions</th>
-          </tr>
-        </thead>
-        <tbody className="border text-sm sm:text-base">
-          {Object.keys(groupedReports).length === 0 ? (
+      <div className="max-sm:max-w-75 max-sm:max-h-80 max-sm:overflow-scroll m-auto">
+        <table className="w-full h-auto m-auto my-5">
+          <thead className="border">
             <tr>
-              <td colSpan={5} className="text text-center py-4">
-                No reports found
-              </td>
+              <th className="w-1/8 text-2xl heading border">Date</th>
+              <th className="w-1/8 text-2xl heading border">Employee</th>
+              <th className="w-1/8 text-2xl heading border">Total Entries</th>
+              <th className="w-4/8 text-2xl heading border max-sm:min-w-max">Entries</th>
+              <th className="w-1/8 text-2xl heading border">Actions</th>
             </tr>
-          ) : (
-            Object.entries(groupedReports).map(([date, reports]) => (
-              <tr key={date}>
-                <td className="text text-center border py-2">{date}</td>
-
-                <td className="border py-2 px-2">
-                  {Array.from(
-                    new Set(
-                      reports
-                        .map((report) => {
-                          const user = usersMap[report.userId];
-                          return user?.name || user?.email || "(Unknown)";
-                        })
-                        .filter(Boolean)
-                    )
-                  ).map((name) => (
-                    <div key={name} className="py-1">
-                      {name}
-                    </div>
-                  ))}
-                </td>
-
-                <td className="border text-center py-2">{reports.length}</td>
-
-                <td className="border py-2">
-                  {reports.map((report) => (
-                    <div key={report.id} className="w-4/5 m-auto p-2">
-                      <Banner
-                        date={`${report.timeStart} - ${report.timeEnd}`}
-                        report={report.report}
-                      />
-                    </div>
-                  ))}
-                </td>
-
-                <td className="text text-center border py-2">
-                  {/* Future actions like edit/delete */}
+          </thead>
+          <tbody className="border text-sm sm:text-base">
+            {Object.keys(groupedReports).length === 0 ? (
+              <tr>
+                <td colSpan={5} className="text text-center py-4">
+                  No reports found
                 </td>
               </tr>
-            ))
-          )}
-        </tbody>
-      </table>
+            ) : (
+              Object.entries(groupedReports).map(([date, reports]) => (
+                <tr key={date}>
+                  <td className="text text-center border py-2">{date}</td>
+
+                  <td className="border py-2 px-2">
+                    {Array.from(
+                      new Set(
+                        reports
+                          .map((report) => {
+                            const user = usersMap[report.userId];
+                            return user?.name || user?.email || "(Unknown)";
+                          })
+                          .filter(Boolean)
+                      )
+                    ).map((name) => (
+                      <div key={name} className="py-1">
+                        {name}
+                      </div>
+                    ))}
+                  </td>
+
+                  <td className="border text-center py-2">{reports.length}</td>
+
+                  <td className="border max-sm:min-w-max py-2">
+                    {reports.map((report) => (
+                      <div key={report.id} className="w-4/5 max-sm:w-full m-auto p-2">
+                        <Banner
+                          date={`${report.timeStart} - ${report.timeEnd}`}
+                          report={report.report}
+                        />
+                      </div>
+                    ))}
+                  </td>
+
+                  <td className="text text-center border py-2">
+                    {reports.map((report) => (
+                      <div key={report.id} className="flex flex-col gap-2">
+                        
+                        {report.status !== "read" ? (
+                          <button
+                            className="btn px-3 py-1 border rounded"
+                            onClick={() => handleMarkRead(report.id)}
+                          >
+                            Pending
+                          </button>
+                        ) : (
+                          <span className="text-green-700 font-semibold">Read</span>
+                        )}
+
+                        <button
+                          className="btn-delete px-3 py-1 border rounded text-red-700"
+                          onClick={() => handleDelete(report.id)}
+                        >
+                          Delete
+                        </button>
+
+                      </div>
+                    ))}
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
     </section>
   );
 }
