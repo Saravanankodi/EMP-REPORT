@@ -29,6 +29,19 @@ const groupReportsByDate = (reports: Report[]): GroupedReports => {
     return acc;
   }, {} as GroupedReports);
 };
+const formatToAmPm = (time24: string) => {
+  if (!time24) return "";
+
+  const [hours, minutes] = time24.split(":").map(Number);
+  const date = new Date();
+  date.setHours(hours, minutes);
+
+  return date.toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  });
+};
 
 
 function History() {
@@ -93,7 +106,7 @@ function History() {
                       {reports.map((report) => (
                         <div key={report.id} className="w-4/5 m-auto p-2">
                           <Banner
-                            date={`${report.timeStart} - ${report.timeEnd}`}
+                            date={`${formatToAmPm(report.timeStart)} - ${formatToAmPm(report.timeEnd)}`}
                             report={report.report}
                           />
                         </div>
