@@ -18,6 +18,7 @@ type GroupedReports = Record<string, Report[]>;
 
 const groupReportsByDate = (reports: Report[]): GroupedReports => {
   return reports.reduce((acc, report) => {
+    if (!report.submittedAt) return acc;
     const dateKey = report.submittedAt.toDate().toLocaleDateString("en-GB");
  
     if (!acc[dateKey]) {
@@ -34,28 +35,28 @@ function History() {
   const [groupedReports, setGroupedReports] = useState<GroupedReports>({});
 
   useEffect(() => {
-    if (!auth.currentUser) return;
-  
-    const reportsRef = collection(db, "reports");
-  
-    const q = query(
-      reportsRef,
-      where("userId", "==", auth.currentUser.uid),
-      orderBy("submittedAt", "desc")
-    );
-  
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const fetchedReports: Report[] = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...(doc.data() as Omit<Report, "id">),
-      }));
-  
-      setGroupedReports(groupReportsByDate(fetchedReports));
-      console.log(Object.entries(groupedReports))
-    });
-  
-    return () => unsubscribe();
-  }, [groupedReports]);
+  if (!auth.currentUser) return;
+
+  const reportsRef = collection(db, "reports");
+
+  const q = query(
+    reportsRef,
+    where("userId", "==", auth.currentUser.uid),
+    orderBy("submittedAt", "desc")
+  );
+
+  const unsubscribe = onSnapshot(q, (snapshot) => {
+    const fetchedReports: Report[] = snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...(doc.data() as Omit<Report, "id">),
+    }));
+
+    setGroupedReports(groupReportsByDate(fetchedReports));
+  });
+
+  return () => unsubscribe();
+}, []);
+
   
   return (
     <>
@@ -82,6 +83,7 @@ function History() {
                 )}
 
                 {Object.entries(groupedReports).map(([date, reports]) => (
+                  
                   <tr key={date}>
                     {/* Date */}
                     <td className="text text-center border">{date}</td>
@@ -95,20 +97,24 @@ function History() {
                             report={report.report}
                           />
                         </div>
+                        
                       ))}
                     </td>
 
                     {/* Actions */}
-                    <td className="text text-center h-full border m-auto p-2 ">
-                      {reports.map(report=>(
-                        report.status == "read" ?
-                        <p className="text text-white h-12.5 w-24 bg-[#008A2E] grid place-content-center m-auto p-2 my-2 rounded-xl">
-                          Read
-                        </p>: <p className="text text-white h-12.5 w-24 bg-[#ffcc00] grid place-content-center m-auto p-2 my-2 rounded-xl">
-                          Pendding
+                    <td className="text text-center border p-2">
+                      {reports.some(r => r.status !== "read") ? (
+                        <p className="text text-white h-12.5 w-24 bg-[#ffcc00] grid place-content-center m-auto rounded-xl">
+                          Pending
                         </p>
-                      ))}
+                      ) : (
+                        <p className="text text-white h-12.5 w-24 bg-[#008A2E] grid place-content-center m-auto rounded-xl">
+                          Read
+                        </p>
+                      )}
                     </td>
+
+
                   </tr>
                 ))}
               </tbody>

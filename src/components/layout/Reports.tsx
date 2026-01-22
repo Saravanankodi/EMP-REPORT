@@ -167,33 +167,44 @@ function Reports({ filters }: ReportsProps) {
     return unsub;
   }, [filters, usersLoaded, usersMap]);
 
-  const handleMarkRead = async (reportId: string) => {
-    const ref = doc(db, "reports", reportId);
+  const handleMarkReadGroup = async (reports: Report[]) => {
+    const unread = reports.filter(r => r.status !== "read");
   
-    await updateDoc(ref, {
-      status: "read",
-      updatedAt: Timestamp.now(),
-    });
+    if (unread.length === 0) {
+      Swal.fire("Info", "All reports are already read", "info");
+      return;
+    }
   
-    Swal.fire("Updated", "Report marked as read", "success");
+    await Promise.all(
+      unread.map((r) =>
+        updateDoc(doc(db, "reports", r.id), {
+          status: "read",
+          updatedAt: Timestamp.now(),
+        })
+      )
+    );
+  
+    Swal.fire("Updated", "All reports marked as read", "success");
   };
-  const handleDelete = async (reportId: string) => {
-    const ref = doc(db, "reports", reportId);
   
+  const handleDeleteGroup = async (reports: Report[]) => {
     const result = await Swal.fire({
-      title: "Delete this report?",
+      title: "Delete all reports for this day?",
       text: "This action cannot be undone",
       icon: "warning",
       showCancelButton: true,
-      confirmButtonText: "Yes, delete",
+      confirmButtonText: "Yes, delete all",
     });
   
     if (!result.isConfirmed) return;
   
-    await deleteDoc(ref);
+    await Promise.all(
+      reports.map((r) => deleteDoc(doc(db, "reports", r.id)))
+    );
   
-    Swal.fire("Deleted", "Report removed from database", "success");
+    Swal.fire("Deleted", "All reports removed", "success");
   };
+  
   // Rest of your render remains mostly same
   return (
     <section className="w-full h-auto overscroll-contain">
@@ -250,32 +261,29 @@ function Reports({ filters }: ReportsProps) {
                       </div>
                     ))}
                   </td>
-
+                  
                   <td className="text text-center border py-2">
-                    {reports.map((report) => (
-                      <div key={report.id} className="flex flex-col gap-2">
-                        
-                        {report.status !== "read" ? (
-                          <button
-                            className="btn px-3 py-1 border rounded"
-                            onClick={() => handleMarkRead(report.id)}
-                          >
-                            Pending
-                          </button>
-                        ) : (
-                          <span className="text-green-700 font-semibold">Read</span>
-                        )}
-
+                    <div className="flex flex-col gap-2 items-center">
+                      {reports.every(r => r.status === "read") ? (
+                        <span className="text-green-700 font-semibold">All Read</span>
+                      ) : (
                         <button
-                          className="btn-delete px-3 py-1 border rounded text-red-700"
-                          onClick={() => handleDelete(report.id)}
+                          className="btn px-3 py-1 border rounded"
+                          onClick={() => handleMarkReadGroup(reports)}
                         >
-                          Delete
+                          Mark All Read
                         </button>
+                      )}
 
-                      </div>
-                    ))}
+                      <button
+                        className="btn-delete px-3 py-1 border rounded text-red-700"
+                        onClick={() => handleDeleteGroup(reports)}
+                      >
+                        Delete All
+                      </button>
+                    </div>
                   </td>
+
                 </tr>
               ))
             )}

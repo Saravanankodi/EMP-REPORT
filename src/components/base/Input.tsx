@@ -19,7 +19,7 @@ export const Input:React.FC<inputProps> = ({label,name,value,type,placeholder,cl
             <label htmlFor={name} className="text block">
                 {label}
             </label>
-            <input type={type} name={name} value={value} onChange={onChange} placeholder={placeholder} className={cn(className,inputStyle)} />
+            <input type={type} name={name} value={value} onChange={onChange} placeholder={placeholder} className={cn(className,inputStyle)} required />
         </div>
         </>
     )
