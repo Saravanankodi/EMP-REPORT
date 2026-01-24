@@ -44,17 +44,20 @@ interface EnrichedReport extends Report {
   userName: string;
 }
 
-const groupReportsByDate = <T extends { submittedAt: Timestamp }>(
+const groupReportsByDateAndUser = <T extends { submittedAt: Timestamp; userId: string }>(
   reports: T[]
 ): Record<string, T[]> => {
   return reports.reduce((acc, report) => {
     const dateKey = report.submittedAt.toDate().toLocaleDateString("en-GB");
+    const groupKey = `${dateKey}__${report.userId}`; // 👈 important
 
-    if (!acc[dateKey]) acc[dateKey] = [];
-    acc[dateKey].push(report);
+    if (!acc[groupKey]) acc[groupKey] = [];
+    acc[groupKey].push(report);
+
     return acc;
   }, {} as Record<string, T[]>);
 };
+
 
 interface ReportsProps {
   filters: FilterState;
@@ -161,7 +164,7 @@ function Reports({ filters }: ReportsProps) {
           "(Unknown User)",
       }));
 
-      setGroupedReports(groupReportsByDate(enriched));
+      setGroupedReports(groupReportsByDateAndUser(enriched));
     });
 
     return unsub;
@@ -234,71 +237,81 @@ function Reports({ filters }: ReportsProps) {
             </tr>
           </thead>
           <tbody className="border text-sm sm:text-base">
-            {Object.keys(groupedReports).length === 0 ? (
+          {Object.keys(groupedReports).length === 0 ? (
               <tr>
                 <td colSpan={5} className="text text-center py-4">
                   No reports found
                 </td>
               </tr>
             ) : (
-              Object.entries(groupedReports).map(([date, reports]) => (
-                <tr key={date}>
-                  <td className="text text-center border py-2">{date}</td>
+              Object.entries(groupedReports).map(([key, reports]) => {
+                const [date, userId] = key.split("__");
+                const user = usersMap[userId];
 
-                  <td className="border py-2 px-2">
-                    {Array.from(
-                      new Set(
-                        reports
-                          .map((report) => {
-                            const user = usersMap[report.userId];
-                            return user?.name || user?.email || "(Unknown)";
-                          })
-                          .filter(Boolean)
-                      )
-                    ).map((name) => (
-                      <div key={name} className="py-1">
-                        {name}
-                      </div>
-                    ))}
-                  </td>
+                return (
+                  <tr key={key}>
+                    <td className="text text-center border py-2">
+                      {date}
+                    </td>
 
-                  <td className="border text-center py-2">{reports.length}</td>
+                    <td className="border text-center py-2 px-2">
+                      {user?.name || user?.email || "(Unknown)"}
+                    </td>
 
-                  <td className="border max-sm:min-w-max py-2">
-                    {reports.map((report) => (
-                      <div key={report.id} className="w-4/5 max-sm:w-full m-auto p-2">
-                        <Banner
-                          date={`${formatToAmPm(report.timeStart)} - ${formatToAmPm(report.timeEnd)}`}
-                          report={report.report}
-                        />
-                      </div>
-                    ))}
-                  </td>
-                  
-                  <td className="text text-center border py-2">
-                    <div className="flex flex-col gap-2 items-center">
-                      {reports.every(r => r.status === "read") ? (
-                        <span className="text-green-700 font-semibold">All Read</span>
-                      ) : (
-                        <button
-                          className="btn px-3 py-1 border rounded"
-                          onClick={() => handleMarkReadGroup(reports)}
+                    <td className="border text-center py-2">
+                      {reports.length}
+                    </td>
+
+                    <td className="border max-sm:min-w-max py-2">
+                      {reports.map((report) => (
+                        <div
+                          key={report.id}
+                          className="w-4/5 max-sm:w-full m-auto p-2"
                         >
-                          Mark All Read
+                          <Banner
+                            date={`${formatToAmPm(
+                              report.timeStart
+                            )} - ${formatToAmPm(
+                              report.timeEnd
+                            )}`}
+                            report={report.report}
+                          />
+                        </div>
+                      ))}
+                    </td>
+
+                    <td className="text text-center border py-2">
+                      <div className="flex flex-col gap-2 items-center">
+                        {reports.every(
+                          (r) => r.status === "read"
+                        ) ? (
+                          <span className="text-green-700 font-semibold">
+                            All Read
+                          </span>
+                        ) : (
+                          <button
+                            className="btn px-3 py-1 border rounded"
+                            onClick={() =>
+                              handleMarkReadGroup(reports)
+                            }
+                          >
+                            Mark All Read
+                          </button>
+                        )}
+
+                        <button
+                          className="btn-delete px-3 py-1 border rounded text-red-700"
+                          onClick={() =>
+                            handleDeleteGroup(reports)
+                          }
+                        >
+                          Delete All
                         </button>
-                      )}
-
-                      <button
-                        className="btn-delete px-3 py-1 border rounded text-red-700"
-                        onClick={() => handleDeleteGroup(reports)}
-                      >
-                        Delete All
-                      </button>
-                    </div>
-                  </td>
-
-                </tr>
-              ))
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })
             )}
           </tbody>
         </table>
