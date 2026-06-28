@@ -3,6 +3,8 @@ import { Button } from '../base/Button'
 import React, { useState } from 'react'
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import {auth,db} from '../../lib/firebase'
+import { TimeInput } from '../base/TimeInput ';
+
 
 
 function ReportForm() {
@@ -48,19 +50,15 @@ function ReportForm() {
   return (
     <>
     <form onSubmit={handleSubmit} className="w-full h-fit m-auto border py-2 px-4 sm:py-5 sm:px-10 rounded-2xl flex flex-col sm:flex-row items-center sm:items-baseline-last justify-center sm:justify-evenly gap-5 ">
-      <Input
-      label='Start-Time'
-      type='time'
-      value={startTime}
-      onChange={e=>{setStartTime(e.target.value)}}
-      className='max-w-75 text-base'
+      <TimeInput
+        label="Start-Time"
+        value={startTime}
+        onChange={(value) => setStartTime(value ?? '')}
       />
-      <Input
-      label='End-Time'
-      type='time'
-      value={endTime}
-      onChange={e=>{setEndTime(e.target.value)}}
-      className='max-w-75 text-base'
+      <TimeInput
+        label="End-Time"
+        value={endTime}
+        onChange={(value) => setEndTime(value ?? '')}
       />
       <Input
       label='Description'
